@@ -250,19 +250,22 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
   },
   arcadeTeamName: {
-    fontSize: 30,
+    fontSize: 20,
     color: 'white',
+    textTransform: 'uppercase',
+    flexWrap: 'wrap',
+    textAlign: 'center',
   },
   serveIndicators: {
     flexDirection: 'row',
-    marginLeft: 10,
+    marginLeft: 5,
   },
   serveCircle: {
     width: 10,
     height: 10,
     borderRadius: 5,
     backgroundColor: '#9ACD32',
-    marginHorizontal: 5,
+    marginHorizontal: 4,
   },
   arcadeScoreBoxA: {
     width: 80,

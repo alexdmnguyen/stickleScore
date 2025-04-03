@@ -22,7 +22,7 @@ export default function App() {
 
   const [teamAName, setTeamAName] = useState('Team A');
   const [teamBName, setTeamBName] = useState('Team B');
-  const [isDoubles, setIsDoubles] = useState(false); // Default to "Best of 1"
+  const [isDoubles, setIsDoubles] = useState(true);
 
   const [currentTheme, setCurrentTheme] = useState('default');
   const [showCustomization, setShowCustomization] = useState(true); // Show customization window initially
@@ -38,50 +38,93 @@ export default function App() {
   };
 
   const announceScore = () => {
-    const scoreText = `${teamAScore}, ${teamBScore}, ${serveState.server}`;
+    const servingScore = serveState.servingTeam === 'A' ? teamAScore : teamBScore;
+    const opponentScore = serveState.servingTeam === 'A' ? teamBScore : teamAScore;
+  
+    const scoreText = isDoubles 
+      ? `${servingScore}, ${opponentScore}, ${serveState.server}`  // Doubles: includes server number
+      : `${servingScore}, ${opponentScore}`; // Singles: excludes server number
+  
     Speech.speak(scoreText);
   };
 
   const handlePoint = (team) => {
     if (gameOver) return;
-
-    if (team === 'A' && serveState.servingTeam === 'A') {
-      Animated.timing(teamAScoreAnim, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-
+  
+    if (isDoubles) {
+      // **Doubles Logic (Default)**
+      if (team === 'A' && serveState.servingTeam === 'A') {
+        scorePoint('A');
+      } else if (team === 'B' && serveState.servingTeam === 'B') {
+        scorePoint('B');
+      }
+      updateServeState(team);
+    } else {
+      // **Singles Logic**
+      if (team === serveState.servingTeam) {
+        // Server wins the rally, they score
+        scorePoint(team);
+      } else {
+        // Receiver wins the rally, just switch serve
+        switchSinglesServe();
+      }
+    }
+  };
+  
+  // Function to increase score and animate
+  const scorePoint = (team) => {
+    if (team === 'A') {
+      animateScore(teamAScoreAnim);
       setTimeout(() => {
-        setTeamAScore((prev) => prev + 1);
-        Animated.timing(teamAScoreAnim, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }).start();
+        setTeamAScore((prev) => {
+          const newScoreA = prev + 1;
+          checkForWinner(newScoreA, teamBScore); // Pass updated scores
+          return newScoreA;
+        });
       }, 150);
-    } else if (team === 'B' && serveState.servingTeam === 'B') {
-      Animated.timing(teamBScoreAnim, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }).start();
-
+    } else {
+      animateScore(teamBScoreAnim);
       setTimeout(() => {
-        setTeamBScore((prev) => prev + 1);
-        Animated.timing(teamBScoreAnim, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }).start();
+        setTeamBScore((prev) => {
+          const newScoreB = prev + 1;
+          checkForWinner(teamAScore, newScoreB); // Pass updated scores
+          return newScoreB;
+        });
       }, 150);
     }
-
-    updateServeState(team);
-    checkForWinner();
   };
+  
+  // Function to animate score change
+  const animateScore = (scoreAnim) => {
+    Animated.timing(scoreAnim, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+  
+    setTimeout(() => {
+      Animated.timing(scoreAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }).start();
+    }, 150);
+  };
+  
+  // Function to switch serve in Singles (no point awarded)
+  const switchSinglesServe = () => {
+    setServeState((prev) => ({
+      servingTeam: prev.servingTeam === 'A' ? 'B' : 'A',
+      server: 1, // Only one server in Singles
+    }));
+  };
+  
+  
 
   const updateServeState = (team) => {
+
+    if (!isDoubles) return;
+
     if (team === 'A') {
       if (serveState.servingTeam === 'A') return;
       else if (serveState.servingTeam === 'B') {
@@ -102,22 +145,27 @@ export default function App() {
     }
   };
 
-  const checkForWinner = () => {
-    if (teamAScore >= 11 && teamAScore - teamBScore >= 2) {
+  const checkForWinner = (scoreA, scoreB) => {
+    if (scoreA >= 11 && scoreA - scoreB >= 2) {
       setWinner(teamAName);
       setShowWinScreen(true);
       setGameOver(true);
-    } else if (teamBScore >= 11 && teamBScore - teamAScore >= 2) {
+    } else if (scoreB >= 11 && scoreB - scoreA >= 2) {
       setWinner(teamBName);
       setShowWinScreen(true);
       setGameOver(true);
     }
   };
+  
 
   const resetGame = () => {
     setTeamAScore(0);
     setTeamBScore(0);
-    setServeState({ servingTeam: 'A', server: 2 });
+    if (!isDoubles) {
+      setServeState({ servingTeam: 'A', server: 1 });
+    } else {
+      setServeState({ servingTeam: 'A', server: 2 });
+    }
     setGameOver(false);
     setShowWinScreen(false);
     setWinner(null);
@@ -154,6 +202,35 @@ export default function App() {
   const toggleTheme = (theme) => {
     setCurrentTheme(theme);
   };
+
+  const startButtonScale = useRef(new Animated.Value(1)).current;
+
+  const startGameAnimation = () => {
+    Animated.parallel([
+      Animated.timing(startButtonScale, {
+        toValue: 1.35, // Slight bounce effect before disappearing
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      // Animated.timing(modalOpacity, {
+      //   toValue: 0, // Fade out modal
+      //   duration: 300,
+      //   useNativeDriver: true,
+      // }),
+      // Animated.timing(modalTranslate, {
+      //   toValue: 300, // Slide down
+      //   duration: 300,
+      //   useNativeDriver: true,
+      // }),
+    ]).start(() => {
+      setShowCustomization(false); // Hide modal after animation
+      startButtonScale.setValue(1); // Reset button scale
+    });
+  };
+  
+  
+  
+
   
 
   return (
@@ -188,32 +265,40 @@ export default function App() {
           toggleDropdown={toggleDropdown}
           showDropdown={showDropdown}
           openCustomization={() => setShowCustomization(true)}
+          resetGame={resetGame}
+          announceScore={announceScore}
         />
   
         {/* Customization Modal */}
         {showCustomization && (
-          <Modal visible={showCustomization} transparent animationType="fade">
-            <View
+          <Modal visible={showCustomization} transparent animationType="slide">
+            <Animated.View
               style={[
                 styles.modalContainer,
-                { backgroundColor: themes[currentTheme].modalBackground },
+                {
+                  backgroundColor: themes[currentTheme].modalBackground,
+                  flexDirection: isLandscape ? 'row' : 'column', 
+                  justifyContent: isLandscape ? 'space-evenly' : 'center',
+                  alignItems: 'center',
+                },
               ]}
             >
-              <Text
-                style={[
-                  styles.customtitle,
-                  { color: themes[currentTheme].scoreTextColor },
-                ]}
+
+              {/* X Close Button */}
+              <TouchableOpacity
+                style={[styles.dropdownButton, styles.closeButton]} // Reuse dropdownButton styles
+                onPress={() => setShowCustomization(false)} // Close modal on press
               >
-                Customize Game
+                <Text style={styles.closeButtonText}>X</Text>
+              </TouchableOpacity>
+
+              <Text style={[styles.customtitle, { color: themes[currentTheme].scoreTextColor }]}>
+                CUSTOMIZE GAME
               </Text>
               <TextInput
                 style={[
                   styles.input,
-                  {
-                    backgroundColor: themes[currentTheme].inputBackground,
-                    color: themes[currentTheme].inputTextColor,
-                  },
+                  { backgroundColor: themes[currentTheme].inputBackground, color: themes[currentTheme].inputTextColor },
                 ]}
                 placeholder="Team A Name"
                 placeholderTextColor={themes[currentTheme].inputTextColor}
@@ -223,103 +308,124 @@ export default function App() {
               <TextInput
                 style={[
                   styles.input,
-                  {
-                    backgroundColor: themes[currentTheme].inputBackground,
-                    color: themes[currentTheme].inputTextColor,
-                  },
+                  { backgroundColor: themes[currentTheme].inputBackground, color: themes[currentTheme].inputTextColor },
                 ]}
                 placeholder="Team B Name"
                 placeholderTextColor={themes[currentTheme].inputTextColor}
                 value={teamBName}
                 onChangeText={setTeamBName}
               />
+              
               <View style={styles.buttonGroup}>
                 <TouchableOpacity
-                  style={[
-                    styles.optionButton,
-                    isDoubles && styles.selectedButton,
-                  ]}
+                  style={[styles.themeButton, isDoubles && styles.selectedButton]}
                   onPress={() => setIsDoubles(true)}
-                >
-                  <Text style={styles.optionText}>Singles</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.optionButton,
-                    !isDoubles && styles.selectedButton,
-                  ]}
-                  onPress={() => setIsDoubles(false)}
                 >
                   <Text style={styles.optionText}>Doubles</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.themeButton, !isDoubles && styles.selectedButton]}
+                  onPress={() => setIsDoubles(false)}
+                >
+                  <Text style={styles.optionText}>Singles</Text>
+                </TouchableOpacity>
               </View>
-              <Button title="Start Game!" onPress={() => setShowCustomization(false)} />
-              {/* Theme selection */}
-              <TouchableOpacity onPress={() => changeTheme('default')}>
-                <Text
-                  style={[
-                    styles.optionText,
-                    { color: themes[currentTheme].scoreTextColor },
-                  ]}
+
+              {/* Theme Selection */}
+              <View style={styles.themeButtonGroup}>
+                <TouchableOpacity
+                  style={[styles.themeButton, currentTheme === 'default' && styles.selectedButton]}
+                  onPress={() => changeTheme('default')}
                 >
-                  Day Theme
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => changeTheme('retroDark')}>
-                <Text
-                  style={[
-                    styles.optionText,
-                    { color: themes[currentTheme].scoreTextColor },
-                  ]}
+                  <Text style={styles.optionText}>Day Theme</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.themeButton, currentTheme === 'retroDark' && styles.selectedButton]}
+                  onPress={() => changeTheme('retroDark')}
                 >
-                  Night Theme
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => changeTheme('arcade')}>
-                <Text
-                  style={[
-                    styles.optionText,
-                    { color: themes[currentTheme].scoreTextColor },
-                  ]}
+                  <Text style={styles.optionText}>Night Theme</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.themeButton, currentTheme === 'arcade' && styles.selectedButton]}
+                  onPress={() => changeTheme('arcade')}
                 >
-                  Pro Theme
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => changeTheme('modern')}>
-                <Text
-                  style={[
-                    styles.optionText,
-                    { color: themes[currentTheme].scoreTextColor },
-                  ]}
+                  <Text style={styles.optionText}>Pro Theme</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.themeButton, currentTheme === 'modern' && styles.selectedButton]}
+                  onPress={() => changeTheme('modern')}
                 >
-                  Modern Theme
-                </Text>
+                  <Text style={styles.optionText}>Modern Theme</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Start Game Button */}
+              <TouchableOpacity 
+                style={styles.startButton} 
+                onPress={startGameAnimation}
+                activeOpacity={0.8}
+              >
+                <Animated.Text style={[styles.startButtonText, { transform: [{ scale: startButtonScale }] }]}>
+                  Start Game!
+                </Animated.Text>
               </TouchableOpacity>
-            </View>
+
+            </Animated.View>
           </Modal>
         )}
+
   
         {/* Win Screen Modal */}
         {showWinScreen && (
-          <Modal visible={showWinScreen} transparent animationType="slide">
-            <View style={styles.modalContainer}>
-              <Text style={styles.winTitle}>
-                Congratulations to {winner}!
+          <Modal visible={showWinScreen} transparent animationType="fade">
+            <View
+              style={[
+                styles.modalContainer,
+                { backgroundColor: themes[currentTheme].modalBackground },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.winTitle,
+                  { color: themes[currentTheme].scoreTextColor },
+                ]}
+              >
+                Congratulations to{' '}
+                <Text style={{ color: themes[currentTheme].winnerTextColor }}>
+                  {winner}
+                </Text>
+                !
               </Text>
-              <Text style={styles.winText}>
+              <Text
+                style={[
+                  styles.winText,
+                  { color: themes[currentTheme].scoreTextColor },
+                ]}
+              >
                 {teamAName}: {teamAScore} | {teamBName}: {teamBScore}
               </Text>
+
               <View style={styles.buttonGroup}>
-                <TouchableOpacity onPress={resetGame} style={styles.button}>
-                  <Text style={styles.buttonText}>Restart Game</Text>
+                <TouchableOpacity
+                  onPress={resetGame}
+                  style={[styles.themeButton, styles.selectedButton]} // Same button style as customization modal
+                >
+                  <Text style={styles.optionText}>Restart Game</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={newGame} style={styles.button}>
-                  <Text style={styles.buttonText}>New Game</Text>
+                <TouchableOpacity
+                  onPress={newGame}
+                  style={[styles.themeButton, styles.selectedButton]}
+                >
+                  <Text style={styles.optionText}>New Game</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </Modal>
         )}
+
   
         <View style={[styles.innerContainer, isLandscape && styles.landscapeContainer]}>
           {!isLandscape ? (
@@ -346,6 +452,7 @@ export default function App() {
                       serveCount={serveState.servingTeam === 'A' ? serveState.server : 0}
                       currentTheme={currentTheme}
                       team="A" 
+                      isDoubles={isDoubles}
                     />
                   </View>
                   <View style={styles.bottomHalf}>
@@ -366,6 +473,7 @@ export default function App() {
                       serveCount={serveState.servingTeam === 'B' ? serveState.server : 0}
                       currentTheme={currentTheme}
                       team="B" 
+                      isDoubles={isDoubles}
                     />
                     <Text style={styles.modernTeamBName}>{teamBName}</Text>
                   </View>
@@ -380,6 +488,7 @@ export default function App() {
                     serving={serveState.servingTeam === 'A'}
                     serveCount={serveState.servingTeam === 'A' ? serveState.server : 0}
                     currentTheme={currentTheme}
+                    isDoubles={isDoubles}
                   />
                   {/* <Scoreboard
                     teamAScore={teamAScore}
@@ -397,6 +506,7 @@ export default function App() {
                     serving={serveState.servingTeam === 'B'}
                     serveCount={serveState.servingTeam === 'B' ? serveState.server : 0}
                     currentTheme={currentTheme}
+                    isDoubles={isDoubles}
                   />
                   <Text style={styles.teamBNameText}>{teamBName}</Text>
                 </>
@@ -409,6 +519,7 @@ export default function App() {
                     scoreAnim={teamAScoreAnim}
                     serving={serveState.servingTeam === 'A'}
                     serveCount={serveState.servingTeam === 'A' ? serveState.server : 0}
+                    isDoubles={isDoubles}
                   />
                   {/* <Scoreboard
                     teamAScore={teamAScore}
@@ -425,6 +536,7 @@ export default function App() {
                     scoreAnim={teamBScoreAnim}
                     serving={serveState.servingTeam === 'B'}
                     serveCount={serveState.servingTeam === 'B' ? serveState.server : 0}
+                    isDoubles={isDoubles}
                   />
                   <Text style={styles.teamBNameText}>{teamBName}</Text>
                 </>
@@ -457,6 +569,7 @@ export default function App() {
                       serveCount={serveState.servingTeam === 'A' ? serveState.server : 0}
                       currentTheme={currentTheme}
                       team="A" 
+                      isDoubles={isDoubles}
                     />
                   </View>
                   <View style={styles.rightHalf}>
@@ -478,6 +591,7 @@ export default function App() {
                       serveCount={serveState.servingTeam === 'B' ? serveState.server : 0}
                       currentTheme={currentTheme}
                       team="B" 
+                      isDoubles={isDoubles}
                     />
                   </View>
                 </View>
@@ -493,6 +607,7 @@ export default function App() {
                         serving={serveState.servingTeam === 'A'}
                         serveCount={serveState.servingTeam === 'A' ? serveState.server : 0}
                         currentTheme={currentTheme}
+                        isDoubles={isDoubles}
                       />
                     </View>
                     {/* <Scoreboard
@@ -513,6 +628,7 @@ export default function App() {
                         serving={serveState.servingTeam === 'B'}
                         serveCount={serveState.servingTeam === 'B' ? serveState.server : 0}
                         currentTheme={currentTheme}
+                        isDoubles={isDoubles}
                       />
                     </View>
                   </View>
@@ -527,6 +643,7 @@ export default function App() {
                       scoreAnim={teamAScoreAnim}
                       serving={serveState.servingTeam === 'A'}
                       serveCount={serveState.servingTeam === 'A' ? serveState.server : 0}
+                      isDoubles={isDoubles}
                     />
                   </View>
                   {/* <Scoreboard
@@ -546,6 +663,7 @@ export default function App() {
                       scoreAnim={teamBScoreAnim}
                       serving={serveState.servingTeam === 'B'}
                       serveCount={serveState.servingTeam === 'B' ? serveState.server : 0}
+                      isDoubles={isDoubles}
                     />
                   </View>
                 </View>

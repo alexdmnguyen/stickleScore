@@ -3,7 +3,7 @@ import { Animated, TouchableOpacity, StyleSheet, Text, View } from 'react-native
 import { Audio } from 'expo-av';
 import styles, {themes} from '../styles';
 
-const AnimatedPointButton = ({ onPress, score, scoreAnim, serving, serveCount, currentTheme, team }) => {
+const AnimatedPointButton = ({ onPress, score, scoreAnim, serving, serveCount, currentTheme, team, isDoubles }) => {
   const [opacityButton] = useState(new Animated.Value(1));
   const [opacityImage] = useState(new Animated.Value(0));
   const [spinValue] = useState(new Animated.Value(0));
@@ -12,13 +12,13 @@ const AnimatedPointButton = ({ onPress, score, scoreAnim, serving, serveCount, c
   const circleStyle = currentTheme === 'modern' 
     ? [styles.circle, { backgroundColor: 'rgb(255, 255, 255)' }] // For modern theme
     : currentTheme === 'retroDark'
-    ? [styles.circle, { backgroundColor: 'rgb(78, 1, 90)' }] // For modern theme
+    ? [styles.circle, { backgroundColor: 'rgb(30,33,36)' }] // For modern theme
     : styles.circle; // Default for other themes (arcade, etc.)
 
   const scoreTextColor = currentTheme === 'modern' 
     ? (team === 'A' ? 'rgb(183, 224, 255)' : 'rgb(239, 90, 111)')
     : currentTheme === 'retroDark'
-    ? 'rgb(0, 0, 0)' // For modern theme
+    ? 'rgb(255, 255, 255)' // For modern theme
     : '#fff'; 
 
   // Load the sound effects when the component mounts
@@ -121,13 +121,36 @@ const AnimatedPointButton = ({ onPress, score, scoreAnim, serving, serveCount, c
             </Animated.Text>
             {/* Small circles representing serve */}
             {serving && (
-              <View style={styles.serveIndicators}>
-                <View
-                  style={[styles.serveCircle, { opacity: serveCount >= 1 ? 1 : 0, backgroundColor: scoreTextColor }]}
-                />
-                <View
-                  style={[styles.serveCircle, { opacity: serveCount === 2 ? 1 : 0, backgroundColor: scoreTextColor }]}
-                />
+              <View
+              style={[
+                styles.serveIndicators,
+                { justifyContent: isDoubles ? 'space-between' : 'center' }, // Dynamically adjust layout
+              ]}
+              >
+                {/* In Singles, only show ONE serve circle */}
+                {isDoubles ? (
+                  <>
+                    <View
+                      style={[
+                        styles.serveCircle,
+                        { opacity: serveCount >= 1 ? 1 : 0, backgroundColor: scoreTextColor },
+                      ]}
+                    />
+                    <View
+                      style={[
+                        styles.serveCircle,
+                        { opacity: serveCount === 2 ? 1 : 0, backgroundColor: scoreTextColor },
+                      ]}
+                    />
+                  </>
+                ) : (
+                  <View
+                    style={[
+                      styles.singlesServeCircle,
+                      { opacity: serving ? 1 : 0, backgroundColor: scoreTextColor },
+                    ]}
+                  />
+                )}
               </View>
             )}
           </Animated.View>

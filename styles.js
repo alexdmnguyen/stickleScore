@@ -65,11 +65,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24,
   },
+  closeButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 1)',
+    padding: 15,
+    paddingVertical: 10,
+    borderRadius: 50,
+    zIndex: 0,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 20,
+  },
   dropdownMenu: {
     position: 'absolute',
-    top: 90,
+    top: 88,
     right: 20,
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 8,
     shadowColor: '#000',
     shadowOpacity: 0.1,
@@ -83,7 +97,8 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
-    color: '#000',
+    color: 'white',
+    textAlign: 'center',
   },
   buttons: {
     flexDirection: 'row',
@@ -221,6 +236,7 @@ const styles = StyleSheet.create({
   },
   startButton: {
     color: '#4CAF50',
+    zIndex: 11,
   },
   video: {
     width: '100%',
@@ -283,6 +299,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 50,
   },
+  singlesServeCircle: {
+    width: 15,
+    height: 15,
+    backgroundColor: '#fff',
+    borderRadius: 50,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#ccc',
+    marginVertical: 5,
+    width: '90%',
+    alignSelf: 'center', 
+  },
   modernLayout: {
     flexDirection: 'column',
     width: '100%',
@@ -335,29 +364,93 @@ const styles = StyleSheet.create({
   },
   teamANameText: {
     color: '#fff',
-    fontSize: 50,
+    fontSize: 40,
     marginTop: 75,
     fontWeight: 'bold',
   },
   teamBNameText: {
     color: '#fff',
-    fontSize: 50,
+    fontSize: 40,
+    marginBottom: 75,
+    fontWeight: 'bold',
+  },
+  nightTeamANameText: {
+    color: 'rgb(239, 90, 111)',
+    fontSize: 40,
+    marginTop: 75,
+    fontWeight: 'bold',
+  },
+  nightTeamBNameText: {
+    color: 'rgb(239, 90, 111)',
+    fontSize: 40,
     marginBottom: 75,
     fontWeight: 'bold',
   },
   teamANameLand: {
     color: '#fff',
-    fontSize: 50,
+    fontSize: 40,
     marginBottom: 10,
     fontWeight: 'bold',
   },
   
   teamBNameLand: {
     color: '#fff',
-    fontSize: 50,
+    fontSize: 40,
     marginBottom: 10,
     fontWeight: 'bold',
   },
+  themeButtonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 10,
+    flexWrap: 'wrap', // Allows buttons to wrap on smaller screens
+    marginBottom: 35,
+  },
+  
+  themeButton: {
+    backgroundColor: 'rgb(87, 88, 89)',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    margin: 10,
+  },
+  
+  selectedButton: {
+    backgroundColor: 'green', // Highlighted color for selected theme
+  },
+  
+  optionText: {
+    fontSize: 14, // Adjust as needed
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    paddingHorizontal: 10, // Add horizontal padding
+    color: 'white',
+  },
+  
+
+  startButton: {
+    backgroundColor: 'rgb(39, 125, 191)', // Change this based on your theme
+    paddingVertical: 25,
+    paddingHorizontal: 50,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5, // Adds shadow for Android
+  },
+  
+  startButtonText: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  
+  
 });
 
 const themes = {
@@ -365,37 +458,41 @@ const themes = {
     backgroundColor: '#f0f0f0',
     buttonBackground: '#007bff',
     buttonTextColor: '#fff',
-    scoreTextColor: '#000',
+    scoreTextColor: 'white',
     modalBackground: 'rgba(0, 0, 0, 0.8)',
     inputBackground: '#333',
     inputTextColor: '#fff',
+    winnerTextColor: 'rgba(68, 255, 0, 0.8)',
   },
   retroDark: {
     backgroundColor: '#1b1b1b',
     buttonBackground: '#ff6347', // Tomato Red
     buttonTextColor: '#fff',
-    scoreTextColor: '#ffcc00', // Yellow
-    modalBackground: 'rgba(0, 0, 0, 0.9)',
-    inputBackground: '#444',
-    inputTextColor: '#ffcc00', // Yellow
+    scoreTextColor: 'white',
+    modalBackground: 'rgba(0, 0, 0, 0.8)',
+    inputBackground: '#333',
+    inputTextColor: '#fff',
+    winnerTextColor: 'rgba(224, 100, 207, 0.8)',
   },
   arcade: {
     backgroundColor: '#222',
     buttonBackground: '#00ff00', // Neon Green
     buttonTextColor: '#000',
-    scoreTextColor: '#ff00ff', // Neon Pink
-    modalBackground: 'rgba(0, 0, 0, 0.7)',
-    inputBackground: '#000',
-    inputTextColor: '#00ff00', // Neon Green
+    scoreTextColor: 'white',
+    modalBackground: 'rgba(0, 0, 0, 0.8)',
+    inputBackground: '#333',
+    inputTextColor: '#fff',
+    winnerTextColor: 'yellow',
   },
   modern: {
-    backgroundColor: '#222',
-    buttonBackground: '#00ff00', // Neon Green
-    buttonTextColor: '#000',
-    scoreTextColor: '#ff00ff', // Neon Pink
-    modalBackground: 'rgba(0, 0, 0, 0.7)',
-    inputBackground: '#000',
-    inputTextColor: '#00ff00', // Neon Green
+    backgroundColor: '#f0f0f0',
+    buttonBackground: '#007bff',
+    buttonTextColor: '#fff',
+    scoreTextColor: 'white',
+    modalBackground: 'rgba(0, 0, 0, 0.8)',
+    inputBackground: '#333',
+    inputTextColor: '#fff',
+    winnerTextColor: 'rgba(191, 37, 234, 0.8)',
   },
 };
 
