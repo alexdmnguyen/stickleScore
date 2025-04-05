@@ -13,7 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.alexdmnguyen.PickleScore",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,6 +30,11 @@
     },
     "plugins": [
       "expo-video"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d3600a5d-2618-4972-be2a-baae46e2f6cc"
+      }
+    }
   }
 }
