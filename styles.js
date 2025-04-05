@@ -7,6 +7,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f0f0f0',
   },
+  header: {
+    backgroundColor: '#3D84A8',
+    width: '90%',  // Decreased width for more margin around
+    paddingVertical: 20,  // Vertical padding for more breathing room
+    alignItems: 'center',
+    borderRadius: 10,
+    marginBottom: 40,  // Increased space below header
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  headerText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#fff',
+    letterSpacing: 2,
+    textAlign: 'center',
+  },
+  subHeaderText: {
+    fontSize: 18,
+    color: '#fff',
+    opacity: 0.8,
+    marginTop: 10,  // Increased margin for more space between header and subheader
+    textAlign: 'center',
+  },
+  themeTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#333',
+    marginVertical: 20,  // Vertical margin for more space around the title
+    textAlign: 'center',
+  },
+
+  logoContainer: {
+    position: 'absolute',
+    top: 60,           // Adjust top margin if necessary
+    left: '50%',       // Centers horizontally
+    transform: [{ translateX: -75 }], // Offset by half the width of the logo to fully center it
+    zIndex: 1,
+    marginBottom: 100,
+  },
+  logo: {
+    width: 150,         // Adjust size of the logo
+    height: 150,        // Adjust size of the logo
+    resizeMode: 'contain',  // Ensures the logo maintains its aspect ratio
+  },
+
   scoreboard: {
     alignItems: 'center',
     margin: 50,
@@ -40,12 +88,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    width: 375, // like an iPhone
-    maxWidth: '100%',
-    height: '100vh',
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   backgroundImage: {
     flex: 1,
@@ -168,12 +210,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: 150,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -257,12 +293,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'column',
+    paddingTop: 50,
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 100,
+  },
+  landingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   wrapper: {
     justifyContent: 'center',

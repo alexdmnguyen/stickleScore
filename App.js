@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import {View, Text, SafeAreaView, TouchableOpacity, ImageBackground, Animated, TextInput, StyleSheet, Modal, Button, useWindowDimensions,
+import {View, Text, SafeAreaView, TouchableOpacity, Image, ImageBackground, Animated, TextInput, StyleSheet, Modal, Button, useWindowDimensions,
 } from 'react-native';
 import * as Speech from 'expo-speech';
 import * as ImagePicker from 'expo-image-picker';
@@ -7,6 +7,7 @@ import AnimatedPointButton from './components/AnimatedPointButton';
 import DropdownMenu from './components/DropdownMenu';
 import Scoreboard from './components/Scoreboard';
 import styles, {themes} from './styles';
+import LandingPage from './components/LandingPage';
 
 export default function App() {
   const [teamAScore, setTeamAScore] = useState(0);
@@ -228,8 +229,10 @@ export default function App() {
     });
   };
   
-  
-  
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const startGame = () => {
+    setIsGameStarted(true);  // This will trigger rendering the game after the landing page
+  };
 
   
 
@@ -255,6 +258,12 @@ export default function App() {
       resizeMode="cover"
       blurRadius={currentTheme === 'arcade' ? 0 : 4} // No blur for arcade theme
     >
+
+    {/* {!isGameStarted ? (
+          <LandingPage startGame={startGame} /> // Passing the startGame function as a prop to trigger the game start
+        ) : (
+          <> */}
+
       {/* <SafeAreaView style={styles.container}> */}
         {/* Dropdown Menu Button */}
         <TouchableOpacity onPress={toggleDropdown} style={styles.dropdownButton}>
@@ -277,12 +286,19 @@ export default function App() {
                 styles.modalContainer,
                 {
                   backgroundColor: themes[currentTheme].modalBackground,
-                  flexDirection: isLandscape ? 'row' : 'column', 
+                  flexDirection: 'column', 
                   justifyContent: isLandscape ? 'space-evenly' : 'center',
                   alignItems: 'center',
                 },
               ]}
             >
+
+              <View style={styles.logoContainer}>
+                <Image
+                  source={require('./assets/stickleLogo.png')}  // Ensure the correct path to your logo
+                  style={styles.logo}
+                />
+              </View>
 
               {/* X Close Button */}
               <TouchableOpacity
@@ -672,6 +688,8 @@ export default function App() {
           )}
         </View>
       {/* </SafeAreaView> */}
+      {/* </>
+      )} */}
     </ImageBackground>
   );
   
