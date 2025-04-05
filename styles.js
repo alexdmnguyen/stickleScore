@@ -40,6 +40,12 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    width: 375, // like an iPhone
+    maxWidth: '100%',
+    height: '100vh',
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   backgroundImage: {
     flex: 1,
